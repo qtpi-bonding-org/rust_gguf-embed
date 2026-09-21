@@ -1,0 +1,33 @@
+[package]
+name = "gguf-embed"
+version = "0.1.0"
+edition = "2021"
+description = "GGUF embedding models via llama.cpp: path in, fixed-dimension normalized vectors out"
+
+[dependencies]
+llama-cpp-2 = { version = "=0.1.150", default-features = false }
+# llama-cpp-2 doesn't pin its own llama-cpp-sys-2 version exactly, and a
+# newer llama-cpp-sys-2 (its vendored llama.cpp C API moves fast) can be
+# ABI-incompatible with a given llama-cpp-2 release's Rust bindings — a
+# fresh lockfile resolved 0.1.156 here and failed to compile against
+# llama-cpp-2 0.1.150. Pin it to whatever episutra-frb's lockfile already
+# proves compatible.
+llama-cpp-sys-2 = "=0.1.150"
+tokio = { version = "1", features = ["rt"] }
+thiserror = "2"
+tracing = "0.1"
+
+# Optional: `impl catuskoti::traits::Embedder for GgufEmbedder`, so
+# catuskoti-based consumers (episutra, concordium) don't need their own
+# adapter shim. Off by default so non-catuskoti consumers don't pull
+# catuskoti in. Path dependency (matches the sibling-repo convention used
+# elsewhere in my-libs/episutra) — assumes catuskoti checked out as a
+# sibling under systematic-action/concordium, same layout as episutra's.
+catuskoti = { path = "../../systematic-action/concordium/catuskoti/catuskoti-framework", optional = true }
+async-trait = { version = "0.1", optional = true }
+
+[features]
+catuskoti = ["dep:catuskoti", "dep:async-trait"]
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros", "time"] }
