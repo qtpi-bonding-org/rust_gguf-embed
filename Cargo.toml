@@ -17,17 +17,5 @@ tokio = { version = "1", features = ["rt"] }
 thiserror = "2"
 tracing = "0.1"
 
-# Optional: `impl catuskoti::traits::Embedder for GgufEmbedder`, so
-# catuskoti-based consumers (episutra, concordium) don't need their own
-# adapter shim. Off by default so non-catuskoti consumers don't pull
-# catuskoti in. Path dependency (matches the sibling-repo convention used
-# elsewhere in my-libs/episutra) — assumes catuskoti checked out as a
-# sibling under systematic-action/concordium, same layout as episutra's.
-catuskoti = { path = "../../systematic-action/concordium/catuskoti/catuskoti-framework", optional = true }
-async-trait = { version = "0.1", optional = true }
-
-[features]
-catuskoti = ["dep:catuskoti", "dep:async-trait"]
-
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros", "time"] }

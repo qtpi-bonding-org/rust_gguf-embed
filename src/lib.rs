@@ -17,9 +17,6 @@ mod backend;
 mod embedder;
 mod vector;
 
-#[cfg(feature = "catuskoti")]
-mod catuskoti_impl;
-
 pub use backend::{backend, gpu_layers_override};
 pub use embedder::{GgufEmbedder, GgufEmbedderConfig};
 pub use vector::{truncate_and_normalize, validate_raw_vector, EmbeddingError};
