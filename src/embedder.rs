@@ -392,10 +392,17 @@ mod tests {
         })
     }
 
+    /// Same GPU policy as production callers: `gpu_layers_override` forces
+    /// CPU-only on x86_64, where Metal on a discrete AMD GPU gives wrong
+    /// batched vectors. `GGUF_EMBED_GPU_LAYERS=<n>` overrides it.
+    fn test_config() -> GgufEmbedderConfig {
+        GgufEmbedderConfig::new(128).with_gpu_layers(crate::gpu_layers_override("GGUF_EMBED_GPU_LAYERS"))
+    }
+
     #[tokio::test]
     #[ignore = "loads the real GGUF model"]
     async fn embed_batch_matches_individual_embeds() {
-        let embedder = GgufEmbedder::new(test_gguf_path(), GgufEmbedderConfig::new(128))
+        let embedder = GgufEmbedder::new(test_gguf_path(), test_config())
             .await
             .expect("load embedder");
 
@@ -438,7 +445,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "loads the real GGUF model"]
     async fn embed_repeated_calls_are_consistent() {
-        let embedder = GgufEmbedder::new(test_gguf_path(), GgufEmbedderConfig::new(128))
+        let embedder = GgufEmbedder::new(test_gguf_path(), test_config())
             .await
             .expect("load embedder");
 
@@ -482,7 +489,7 @@ mod tests {
         // each with two short chunk texts — regression test for a hang
         // observed in production after ~500 prior notes had gone through the
         // same context (episutra's tree-of-life reindex).
-        let embedder = GgufEmbedder::new(test_gguf_path(), GgufEmbedderConfig::new(128))
+        let embedder = GgufEmbedder::new(test_gguf_path(), test_config())
             .await
             .expect("load embedder");
 
