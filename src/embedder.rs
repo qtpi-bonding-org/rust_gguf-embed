@@ -140,6 +140,15 @@ fn get_or_load_model(gguf_path: &Path, gpu_layers: Option<u32>) -> Result<&'stat
     let mut params = LlamaModelParams::default();
     if let Some(n) = gpu_layers {
         params = params.with_n_gpu_layers(n);
+        if n == 0 {
+            // `n_gpu_layers = 0` only keeps the weights on the CPU; with a
+            // GPU device still registered, llama.cpp's scheduler offloads
+            // large ops (batch >= 32 tokens) to it anyway. On Intel Macs
+            // with a discrete AMD GPU that path is numerically broken
+            // (wrong batched vectors, intermittent NaN). Registering no
+            // devices makes "CPU-only" literal.
+            params = params.with_devices(&[]).map_err(|e| GgufEmbedError::ModelLoad { path: gguf_path.to_path_buf(), reason: e.to_string() })?;
+        }
     }
     let model = LlamaModel::load_from_file(backend, gguf_path, &params)
         .map_err(|e| GgufEmbedError::ModelLoad { path: gguf_path.to_path_buf(), reason: e.to_string() })?;
