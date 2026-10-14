@@ -1,0 +1,3 @@
+# See cmake/disable-metal-off-apple-silicon.cmake: Metal off unless Apple Silicon.
+[env]
+CMAKE_TOOLCHAIN_FILE = { value = "cmake/disable-metal-off-apple-silicon.cmake", relative = true }
