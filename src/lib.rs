@@ -13,6 +13,11 @@
 //! hand-justified `unsafe impl Send for SendLlamaContext` — rather than
 //! duplicating it. See that impl's doc comment before touching it.
 
+/// Re-exported so consumers that need raw llama.cpp types (episutra's text
+/// generator) take the version from this crate instead of pinning their own;
+/// two copies of `llama-cpp-sys-2` cannot link into one binary.
+pub use llama_cpp_2;
+
 mod backend;
 mod embedder;
 mod vector;
@@ -35,8 +40,6 @@ pub enum GgufEmbedError {
     LoadTaskPanicked(String),
     #[error("embedder lock poisoned")]
     LockPoisoned,
-    #[error("tokenize failed: {0}")]
-    Tokenize(String),
     #[error("batch construction failed: {0}")]
     BatchConstruction(String),
     #[error("encode failed: {0}")]

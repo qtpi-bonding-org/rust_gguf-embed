@@ -5,14 +5,20 @@ edition = "2021"
 description = "GGUF embedding models via llama.cpp: path in, fixed-dimension normalized vectors out"
 
 [dependencies]
-llama-cpp-2 = { version = "=0.1.150", default-features = false }
+# default-features = false drops `common` and openmp; Metal is still
+# auto-enabled by llama-cpp-sys-2 on Apple. `common` is NOT cpp-httplib
+# (llama-cpp-sys-2/build.rs hardcodes LLAMA_CURL=OFF and
+# LLAMA_BUILD_SERVER=OFF). episutra's generator does not want it either:
+# Gemma's tool-call arguments aren't JSON, so json_schema_to_grammar has
+# nothing to describe. Consumers get these types via `gguf_embed::llama_cpp_2`.
+llama-cpp-2 = { version = "=0.1.159", default-features = false }
 # llama-cpp-2 doesn't pin its own llama-cpp-sys-2 version exactly, and a
 # newer llama-cpp-sys-2 (its vendored llama.cpp C API moves fast) can be
 # ABI-incompatible with a given llama-cpp-2 release's Rust bindings — a
 # fresh lockfile resolved 0.1.156 here and failed to compile against
 # llama-cpp-2 0.1.150. Pin it to whatever episutra-frb's lockfile already
 # proves compatible.
-llama-cpp-sys-2 = "=0.1.150"
+llama-cpp-sys-2 = "=0.1.159"
 tokio = { version = "1", features = ["rt"] }
 thiserror = "2"
 tracing = "0.1"

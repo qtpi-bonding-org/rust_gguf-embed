@@ -9,7 +9,7 @@ use llama_cpp_2::context::params::{LlamaContextParams, LlamaPoolingType};
 use llama_cpp_2::context::LlamaContext;
 use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::params::LlamaModelParams;
-use llama_cpp_2::model::{AddBos, LlamaModel};
+use llama_cpp_2::model::LlamaModel;
 use llama_cpp_2::token::LlamaToken;
 
 use crate::backend::backend;
@@ -272,10 +272,9 @@ impl GgufEmbedder {
         let mut pending_idx: Vec<usize> = Vec::new();
         let mut pending_tokens: Vec<Vec<LlamaToken>> = Vec::new();
         for (i, text) in texts.iter().enumerate() {
-            let mut tokens = self
-                .model
-                .str_to_token(text, AddBos::Always)
-                .map_err(|e| GgufEmbedError::Tokenize(e.to_string()))?;
+            // add_special + parse_special both true: the same flags the old
+            // `str_to_token(text, AddBos::Always)` passed to llama_tokenize.
+            let mut tokens = self.model.vocab().tokenize(text.as_bytes(), true, true);
             tokens.truncate(n_ctx);
             if tokens.is_empty() {
                 out[i] = vec![0.0; dim];
